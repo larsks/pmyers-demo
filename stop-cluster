@@ -1,0 +1,11 @@
+#!/bin/sh
+
+COMPUTE_NODES=1
+
+virsh destroy controller
+virsh undefine controller
+
+for (( node=0; node<COMPUTE_NODES; node++ )); do
+	virsh destroy compute-$node
+	virsh undefine compute-$node
+done

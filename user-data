@@ -1,0 +1,42 @@
+#!/bin/sh
+
+RDOREPO=https://repos.fedorapeople.org/repos/openstack/openstack-juno/rdo-release-juno-1.noarch.rpm
+EPELREPO=http://mirror.pnl.gov/epel/7/x86_64/e/epel-release-7-2.noarch.rpm
+
+cat <<EOF
+
+======================================================================
+$(ip addr show eth0)
+======================================================================
+
+EOF
+
+(echo redhat; echo redhat) | passwd --stdin root
+
+# un-disable root
+sed -i 's/.*ssh-/ssh-/' /root/.ssh/authorized_keys
+
+yum -y localinstall $RDOREPO $EPELREPO
+yum -y upgrade
+yum -y install avahi nss-mdns iptables-services
+
+systemctl start iptables
+systemctl enable iptables
+iptables -I INPUT 1 -p udp --dport 5353 -j ACCEPT
+iptables-save > /etc/sysconfig-iptables
+
+systemctl start avahi-daemon
+systemctl enable avahi-daemon
+
+if hostname | grep -q controller; then
+	yum -y install openstack-packstack
+fi
+
+cat <<EOF
+
+======================================================================
+$(ip addr show eth0)
+======================================================================
+
+EOF
+

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+BASE_IMAGE=default/CentOS-7-x86_64-GenericCloud.qcow2
+COMPUTE_NODES=2
+
+for node in controller ; do
+virt-boot -b $BASE_IMAGE -s 20 -u user-data -k id_rsa.pub -- $node \
+	-w network=default,model=virtio \
+	-r 4096 
+done
+
+for (( node=0; node<COMPUTE_NODES; node++ )); do
+	virt-boot -b $BASE_IMAGE -s 20 -u user-data -k id_rsa.pub -- compute-$node \
+		-w network=default,model=virtio \
+		-r 2048 \
+		--cpu SandyBridge,match=exact,require=vmx
+done
