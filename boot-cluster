@@ -1,17 +1,31 @@
 #!/bin/sh
 
+# This script boots a simple cluster of libvirt guests for use as an
+# openstack deployment.  Each guest will boot from a snapshot of
+# $BASE_IMAGE.
+
 BASE_IMAGE=default/CentOS-7-x86_64-GenericCloud.qcow2
+CONTROLLER_RAM=4096
+COMPUTE_RAM=2048
 COMPUTE_NODES=2
+
+cat > hosts <<EOF
+[controller]
+controller.local
+
+[compute]
+EOF
 
 for node in controller ; do
 virt-boot -b $BASE_IMAGE -s 20 -u user-data -k id_rsa.pub -- $node \
 	-w network=default,model=virtio \
-	-r 4096 
+	-r $CONTROLLER_RAM
 done
 
 for (( node=0; node<COMPUTE_NODES; node++ )); do
+	echo compute-$node.local >> hosts
 	virt-boot -b $BASE_IMAGE -s 20 -u user-data -k id_rsa.pub -- compute-$node \
 		-w network=default,model=virtio \
-		-r 2048 \
+		-r $COMPUTE_RAM \
 		--cpu SandyBridge,match=exact,require=vmx
 done
