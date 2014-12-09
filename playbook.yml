@@ -1,8 +1,9 @@
+# This play is here to gather facts from all hosts
 - hosts: all
+
+- hosts: controller.local
   vars:
     controller: "{{hostvars['controller.local']['ansible_eth0']['ipv4']['address']}}"
-    compute_0: "{{hostvars['compute-0.local']['ansible_eth0']['ipv4']['address']}}"
-    compute_1: "{{hostvars['compute-1.local']['ansible_eth0']['ipv4']['address']}}"
   tasks:
     - template: src=answers.txt dest=/root/answers.txt
 

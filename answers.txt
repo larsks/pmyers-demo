@@ -74,7 +74,7 @@ CONFIG_CONTROLLER_HOST={{controller}}
 
 # The list of IP addresses of the server on which to install the Nova
 # compute service
-CONFIG_COMPUTE_HOSTS={{compute_0}},{{compute_1}}
+CONFIG_COMPUTE_HOSTS={% for host, vars in hostvars.items() %}{% if host.startswith('compute-') %}{{vars['ansible_eth0']['ipv4']['address']}},{% endif %}{% endfor %}
 
 # The list of IP addresses of the server on which to install the
 # network service such as Nova network or Neutron
